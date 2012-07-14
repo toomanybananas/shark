@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include "gen.hpp"
+#include "info.hpp"
 //Shark package manager
 
 //Shamelessy stolen from some stack overflow thread
@@ -64,7 +65,7 @@ int Install(std::string package)
 	//untar a file into /usr/pkg
 	std::cout << "Extracting tarball\n";
 	std::stringstream tarball;
-	tarball << "tar xf " << package << ".tar.gz" << " -C "<< root << "usr/pkg";
+	tarball << "tar xf " << package  << " -C "<< root << "usr/pkg";
 	if(system(tarball.str().c_str()))
 	{
 		return 1;
@@ -75,7 +76,21 @@ int Install(std::string package)
 	{
 		packagename = package.substr(slash+1);
 	}
+	int dot = packagename.find(".tar");
+	if(dot)
+	{
+		packagename = packagename.substr(0, dot);
+	}
 	std::cout << "Verifying the package (not really)\n";
+	std::cout << "Loading the package info\n";
+	std::stringstream infofile;
+	infofile << root << "usr/pkg/" << packagename << "/info";
+	int res;
+	std::map<std::string, std::string> info = LoadInfo(infofile.str(), res);
+	if(res != 0)
+		return res;
+	std::string pkgname = info["PKG_NAME"];
+	std::string ver = info["PKG_VER"];
 	std::cout << "Loading the file list\n";
 	std::vector<std::string> filelist;
 	std::ifstream files;
@@ -109,9 +124,9 @@ int Install(std::string package)
 			//we are probably conflicting, but make sure
 			std::string pkg;
 			getline(f, pkg);
-			if(pkg != packagename)
+			if(pkg != pkgname)
 			{
-				std::cout << "Error: package " << packagename << " conflicts with " << pkg << " on file " << filename.str() << ".\nInstallation aborted\n";
+				std::cout << "Error: package " << pkgname << " conflicts with " << pkg << " on file " << filename.str() << ".\nInstallation aborted\n";
 				return 1;
 			}
 		}
@@ -145,10 +160,15 @@ int Install(std::string package)
 		system(f.str().c_str());
 		//update the package db
 		std::stringstream dbcmd;
-		dbcmd << "echo \"" << packagename << "\" > " << root << "usr/pkgdb/" << filelist[i];
+		dbcmd << "echo \"" << pkgname << "\" > " << root << "usr/pkgdb/" << filelist[i];
 		//std::cout << dbcmd.str() << "\n";
 		system(dbcmd.str().c_str());
 	}
+	//install the info file
+	std::stringstream infocmd;
+	infocmd << "cp -fd " << root << "usr/pkg/" << packagename << "/info " << root << "usr/pkg/" << pkgname;
+	//std::cout << infocmd.str() << std::endl;
+	system(infocmd.str().c_str());
 	files.close();
 	return 0;
 }
