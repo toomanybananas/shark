@@ -115,7 +115,7 @@ int Install(std::string package)
 	checkreinstall.open(reinstallcheck.str().c_str());
 	if(checkreinstall.is_open())
 	{
-		std::map<std::string, std::string> reint = LoadInfo(checkreinstall.str().c_str(), res);
+		std::map<std::string, std::string> reint = LoadInfo(reinstallcheck.str().c_str(), res);
 		if(ver == reint["PKG_VER"])
 		{
 			std::cout << "Package " << pkgname << " is already installed. Reinstall?(Y/n)";
