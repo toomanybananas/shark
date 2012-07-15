@@ -115,14 +115,20 @@ int Install(std::string package)
 	checkreinstall.open(reinstallcheck.str().c_str());
 	if(checkreinstall.is_open())
 	{
-		std::cout << "Package " << pkgname << " is already installed. Reinstall/Upgrade?(Y/n)";
-		char c;
-		std::cin >> c;
-		if(c == 'N' || c == 'n')
+		std::map<std::string, std::string> reint = LoadInfo(checkreinstall.str().c_str(), res);
+		if(ver == reint["PKG_VER"])
 		{
-			std::cout << "Installation aborted\n";
-			return 1;
+			std::cout << "Package " << pkgname << " is already installed. Reinstall?(Y/n)";
+			char c;
+			std::cin >> c;
+			if(c == 'N' || c == 'n')
+			{
+				std::cout << "Installation aborted\n";
+				return 1;
+			}
 		}
+		else
+			std::cout << "Upgrading " << pkgname << " to version " << ver << std::endl;
 		checkreinstall.close();
 	}
 	std::cout << "Loading the file list\n";
