@@ -57,6 +57,18 @@ int main(int argc, char* argv[])
 	{
 		GenFiles(root, getField(argv, argv+argc, "--gen-files"), "");
 	}
+	if(getFlag(argv, argv+argc, "--nuke"))
+	{
+		if(root == "/")
+		{
+			std::cout << "ARE YOU CRAZY\n" << "THIS COMMAND DELETES EVERYTHING ON THE ROOT\n" << "DON'T DO THIS\n";
+			return 1;
+		}
+		std::stringstream nukecmd;
+		nukecmd << "rm -rf " << root << "*";
+		//std::cout << nukecmd.str() << std::endl;
+		system(nukecmd.str().c_str());
+	}
 	return 0;
 }
 
