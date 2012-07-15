@@ -27,6 +27,8 @@ bool getFlag(char** begin, char** end, const std::string& option)
 
 std::string root;
 int Install(std::string package);
+int Untar(std::string tarball);
+int Download(std::string package, std::string ver = "");
 int main(int argc, char* argv[])
 {
 	//Set the default values
@@ -40,6 +42,29 @@ int main(int argc, char* argv[])
 	{
 		std::cout << "Error: no fake root set (safe mode)\n";
 		return 1;
+	}
+	if(getFlag(argv, argv+argc, "-U"))
+	{
+		return Untar(getField(argv, argv+argc, "-U"));
+	}
+	if(getFlag(argv, argv+argc, "-UI"))
+	{
+		std::string pkg = getField(argv, argv+argc, "-UI");
+		if(Untar(pkg) != 0)
+		{
+			return 1;
+		}
+		int slash = pkg.find_last_of("/");
+		if(slash != std::string::npos)
+		{
+			pkg = pkg.substr(slash+1);
+		}
+		int dot = pkg.find(".tar");
+		if(dot != std::string::npos)
+		{
+			pkg = pkg.substr(0, dot);
+		}
+		return Install(pkg);
 	}
 	if(getFlag(argv, argv+argc, "-I"))
 	{
@@ -74,29 +99,10 @@ int main(int argc, char* argv[])
 
 int Install(std::string package)
 {
-	//untar a file into /usr/pkg
-	std::cout << "Extracting tarball\n";
-	std::stringstream tarball;
-	tarball << "tar xf " << package  << " -C "<< root << "usr/pkg";
-	if(system(tarball.str().c_str()))
-	{
-		return 1;
-	}
-	std::string packagename = package;
-	int slash = packagename.find_last_of("/");
-	if(slash)
-	{
-		packagename = package.substr(slash+1);
-	}
-	int dot = packagename.find(".tar");
-	if(dot)
-	{
-		packagename = packagename.substr(0, dot);
-	}
 	std::cout << "Verifying the package (not really)\n";
 	std::cout << "Loading the package info\n";
 	std::stringstream infofile;
-	infofile << root << "usr/pkg/" << packagename << "/info";
+	infofile << root << "usr/pkg/" << package << "/info";
 	int res;
 	std::map<std::string, std::string> info = LoadInfo(infofile.str(), res);
 	if(res != 0)
@@ -107,7 +113,7 @@ int Install(std::string package)
 	std::vector<std::string> filelist;
 	std::ifstream files;
 	std::stringstream filesfile;
-	filesfile << root << "usr/pkg/" << packagename << "/files";
+	filesfile << root << "usr/pkg/" << package << "/files";
 	files.open(filesfile.str().c_str());
 	if(!files.is_open())
 	{
@@ -143,12 +149,12 @@ int Install(std::string package)
 			}
 		}
 	}
-	std::cout << "Installing package " << packagename << std::endl;
+	std::cout << "Installing package " << package << std::endl;
 	//TODO:load the info file, add it to the package DB
 	//make the directories from dirs
 	std::ifstream dirs;
 	std::stringstream dirsfile;
-	dirsfile << root << "usr/pkg/" << packagename << "/dirs";
+	dirsfile << root << "usr/pkg/" << package << "/dirs";
 	dirs.open(dirsfile.str().c_str());
 	if(dirs.is_open()) //assume that nothing needs to be made if there is no file
 	{
@@ -167,7 +173,7 @@ int Install(std::string package)
 	for(int i=0; i < filelist.size(); i++)
 	{
 		std::stringstream f;
-		f << "cp -fd " << root << "usr/pkg/" << packagename << "/" << filelist[i] << " " << root << filelist[i];
+		f << "cp -fd " << root << "usr/pkg/" << package << "/" << filelist[i] << " " << root << filelist[i];
 		//std::cout << f.str() << std::endl;
 		system(f.str().c_str());
 		//update the package db
@@ -178,9 +184,21 @@ int Install(std::string package)
 	}
 	//install the info file
 	std::stringstream infocmd;
-	infocmd << "cp -fd " << root << "usr/pkg/" << packagename << "/info " << root << "usr/pkg/" << pkgname;
+	infocmd << "cp -fd " << root << "usr/pkg/" << package << "/info " << root << "usr/pkg/" << pkgname;
 	//std::cout << infocmd.str() << std::endl;
 	system(infocmd.str().c_str());
 	files.close();
+	return 0;
+}
+
+int Untar(std::string tarball)
+{
+	std::cout << "Extracting tarball\n";
+	std::stringstream tar;
+	tar << "tar xf " << tarball << " -C "<< root << "usr/pkg";
+	if(system(tar.str().c_str()))
+	{
+		return 1;
+	}
 	return 0;
 }
