@@ -109,6 +109,22 @@ int Install(std::string package)
 		return res;
 	std::string pkgname = info["PKG_NAME"];
 	std::string ver = info["PKG_VER"];
+	std::ifstream checkreinstall;
+	std::stringstream reinstallcheck;
+	reinstallcheck << root << "usr/pkg/" << pkgname;
+	checkreinstall.open(reinstallcheck.str().c_str());
+	if(checkreinstall.is_open())
+	{
+		std::cout << "Package " << pkgname << " is already installed. Reinstall/Upgrade?(Y/n)";
+		char c;
+		std::cin >> c;
+		if(c == 'N' || c == 'n')
+		{
+			std::cout << "Installation aborted\n";
+			return 1;
+		}
+		checkreinstall.close();
+	}
 	std::cout << "Loading the file list\n";
 	std::vector<std::string> filelist;
 	std::ifstream files;
