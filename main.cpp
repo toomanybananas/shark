@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "gen.hpp"
 #include "info.hpp"
+
 //Shark package manager
 
 //Shamelessy stolen from some stack overflow thread
@@ -268,7 +269,8 @@ std::string Download(std::string package, std::string ver)
 		std::cout << "Resolving for latest version\n";
 		//resolve for latest version
 		std::stringstream infoget;
-		infoget << "wget -q 192.168.1.150/astro/pkg/info/" << package;
+		//infoget << "wget -q 192.168.1.150/astro/pkg/info/" << package;
+		infoget << "curl -s  -o " << package << " 192.168.1.150/astro/pkg/info/" << package;
 		if(system(infoget.str().c_str()) != 0)
 		{
 			std::cout << "Package " << package << " not found\n";
@@ -286,7 +288,8 @@ std::string Download(std::string package, std::string ver)
 	//get the package
 	std::cout << "Downloading package\n";
 	std::stringstream pkgcmd;
-	pkgcmd << "wget -q 192.168.1.150/astro/pkg/" << package << "-" << version << ".tar.gz";
+	//pkgcmd << "wget -q 192.168.1.150/astro/pkg/" << package << "-" << version << ".tar.gz";
+	pkgcmd << "curl -# -o " << package << "-" << version << ".tar.gz 192.168.1.150/astro/pkg/" << package << "-" << version << ".tar.gz";
 	if(system(pkgcmd.str().c_str()) != 0)
 	{
 		std::cout << "Unable to find package tarball for package " << package << "\n";

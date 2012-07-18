@@ -15,8 +15,10 @@ AC_LANG([C++])
 # Checks for libraries.
 
 # Checks for header files.
+AC_CHECK_HEADERS([unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_HEADER_STDBOOL
 
 # Checks for library functions.
 AC_CONFIG_FILES([Makefile])
