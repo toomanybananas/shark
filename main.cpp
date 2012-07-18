@@ -29,7 +29,7 @@ bool getFlag(char** begin, char** end, const std::string& option)
 std::string root;
 int Install(std::string package);
 int Untar(std::string tarball);
-int Download(std::string package, std::string ver = "");
+std::string Download(std::string package, std::string ver = "");
 int main(int argc, char* argv[])
 {
 	//Set the default values
@@ -73,7 +73,37 @@ int main(int argc, char* argv[])
 	}
 	if(getFlag(argv, argv+argc, "-D"))
 	{
-		return Download(getField(argv, argv+argc, "-D"));
+		if(Download(getField(argv, argv+argc, "-D")) == "");
+			return 1;
+	}
+	if(getFlag(argv, argv+argc, "-DU"))
+	{
+		std::string pkg = getField(argv, argv+argc, "-DU");
+		std::string dl = Download(pkg);
+		if(dl == "")
+		{
+			return 1;
+		}
+		return Untar(dl);
+	}
+	if(getFlag(argv, argv+argc, "-DUI"))
+	{
+		std::string pkg = getField(argv, argv+argc, "-DUI");
+		std::string dl = Download(pkg);
+		if(dl == "")
+		{
+			return 1;
+		}
+		if(Untar(dl) != 0)
+		{
+			return 1;
+		}
+		int dot = dl.find(".tar");
+		if(dot != std::string::npos)
+		{
+			dl = dl.substr(0, dot);
+		}
+		return Install(dl);
 	}
 	if(getFlag(argv, argv+argc, "--gen-dirs"))
 	{
@@ -230,18 +260,19 @@ int Untar(std::string tarball)
 	return 0;
 }
 
-int Download(std::string package, std::string ver)
+std::string Download(std::string package, std::string ver)
 {
 	std::string version;
 	if(ver == "")
 	{
+		std::cout << "Resolving for latest version\n";
 		//resolve for latest version
 		std::stringstream infoget;
 		infoget << "wget -q 192.168.1.150/astro/pkg/info/" << package;
 		if(system(infoget.str().c_str()) != 0)
 		{
 			std::cout << "Package " << package << " not found\n";
-			return 1;
+			return "";
 		}
 		int r;
 		std::map<std::string, std::string> newinfo = LoadInfo(package, r);
@@ -253,12 +284,16 @@ int Download(std::string package, std::string ver)
 	else
 		version = ver;
 	//get the package
+	std::cout << "Downloading package\n";
 	std::stringstream pkgcmd;
 	pkgcmd << "wget -q 192.168.1.150/astro/pkg/" << package << "-" << version << ".tar.gz";
 	if(system(pkgcmd.str().c_str()) != 0)
 	{
 		std::cout << "Unable to find package tarball for package " << package << "\n";
-		return 1;
+		return "";
 	}
-	return 0;
+	std::cout << "Download successful\n";
+	std::stringstream ret;
+	ret << package << "-" << version << ".tar.gz";
+	return ret.str();
 }
