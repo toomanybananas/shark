@@ -4,6 +4,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <unistd.h>
 #include "gen.hpp"
 #include "info.hpp"
 //Shark package manager
@@ -69,6 +70,10 @@ int main(int argc, char* argv[])
 	if(getFlag(argv, argv+argc, "-I"))
 	{
 		return Install(getField(argv, argv+argc, "-I"));
+	}
+	if(getFlag(argv, argv+argc, "-D"))
+	{
+		return Download(getField(argv, argv+argc, "-D"));
 	}
 	if(getFlag(argv, argv+argc, "--gen-dirs"))
 	{
@@ -220,6 +225,39 @@ int Untar(std::string tarball)
 	tar << "tar xf " << tarball << " -C "<< root << "usr/pkg";
 	if(system(tar.str().c_str()))
 	{
+		return 1;
+	}
+	return 0;
+}
+
+int Download(std::string package, std::string ver)
+{
+	std::string version;
+	if(ver == "")
+	{
+		//resolve for latest version
+		std::stringstream infoget;
+		infoget << "wget -q 192.168.1.150/astro/pkg/info/" << package;
+		if(system(infoget.str().c_str()) != 0)
+		{
+			std::cout << "Package " << package << " not found\n";
+			return 1;
+		}
+		int r;
+		std::map<std::string, std::string> newinfo = LoadInfo(package, r);
+		version = newinfo["PKG_VER"];
+		std::stringstream rm;
+		rm << "rm " << package;
+		system(rm.str().c_str());
+	}
+	else
+		version = ver;
+	//get the package
+	std::stringstream pkgcmd;
+	pkgcmd << "wget -q 192.168.1.150/astro/pkg/" << package << "-" << version << ".tar.gz";
+	if(system(pkgcmd.str().c_str()) != 0)
+	{
+		std::cout << "Unable to find package tarball for package " << package << "\n";
 		return 1;
 	}
 	return 0;
