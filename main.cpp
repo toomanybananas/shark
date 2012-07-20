@@ -38,6 +38,10 @@ int main(int argc, char* argv[])
 	if(getFlag(argv, argv+argc, "--root"))
 	{
 		root = (std::string)getField(argv, argv+argc, "--root");
+		if(root[root.size()-1] != '/')
+		{
+			root.append("/");
+		}
 		std::cout << "Using " << root << " as /\n";
 	}
 	if(root == "/")
@@ -269,8 +273,7 @@ std::string Download(std::string package, std::string ver)
 		std::cout << "Resolving for latest version\n";
 		//resolve for latest version
 		std::stringstream infoget;
-		//infoget << "wget -q 192.168.1.150/astro/pkg/info/" << package;
-		infoget << "curl -s  -o " << package << " 192.168.1.150/astro/pkg/info/" << package;
+		infoget << "curl -s -f -o " << package << " http://neos300.com/astro/pkg/info/" << package;
 		if(system(infoget.str().c_str()) != 0)
 		{
 			std::cout << "Package " << package << " not found\n";
@@ -288,8 +291,7 @@ std::string Download(std::string package, std::string ver)
 	//get the package
 	std::cout << "Downloading package\n";
 	std::stringstream pkgcmd;
-	//pkgcmd << "wget -q 192.168.1.150/astro/pkg/" << package << "-" << version << ".tar.gz";
-	pkgcmd << "curl -# -o " << package << "-" << version << ".tar.gz 192.168.1.150/astro/pkg/" << package << "-" << version << ".tar.gz";
+	pkgcmd << "curl -# -f -o " << package << "-" << version << ".tar.gz http://neos300.com/astro/pkg/" << package << "-" << version << ".tar.gz";
 	if(system(pkgcmd.str().c_str()) != 0)
 	{
 		std::cout << "Unable to find package tarball for package " << package << "\n";
