@@ -299,6 +299,6 @@ std::string Download(std::string package, std::string ver)
 	}
 	std::cout << "Download successful\n";
 	std::stringstream ret;
-	ret << package << "-" << version << ".tar.gz";
+	ret << package << "-" << version << ".tar.xz";
 	return ret.str();
 }
