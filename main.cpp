@@ -291,7 +291,7 @@ std::string Download(std::string package, std::string ver)
 	//get the package
 	std::cout << "Downloading package\n";
 	std::stringstream pkgcmd;
-	pkgcmd << "curl -# -f -o " << package << "-" << version << ".tar.gz http://neos300.com/astro/pkg/" << package << "-" << version << ".tar.gz";
+	pkgcmd << "curl -# -f -o " << package << "-" << version << ".tar.xz http://neos300.com/astro/pkg/" << package << "-" << version << ".tar.xz";
 	if(system(pkgcmd.str().c_str()) != 0)
 	{
 		std::cout << "Unable to find package tarball for package " << package << "\n";
