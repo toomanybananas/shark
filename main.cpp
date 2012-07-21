@@ -103,6 +103,8 @@ int main(int argc, char* argv[])
 		{
 			return 1;
 		}
+		std::string rm = "rm " + dl;
+		system(rm.c_str());
 		int dot = dl.find(".tar");
 		if(dot != std::string::npos)
 		{
@@ -188,6 +190,8 @@ int Install(std::string package)
 		std::getline(files, line);
 		if(line == "EOF")
 			break;
+		if(line == "")
+			continue;
 		filelist.push_back(line);
 	}
 	files.close();
