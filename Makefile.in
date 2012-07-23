@@ -66,7 +66,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_shark_OBJECTS = main.$(OBJEXT) gen.$(OBJEXT) info.$(OBJEXT)
+am_shark_OBJECTS = main.$(OBJEXT) gen.$(OBJEXT) info.$(OBJEXT) \
+	file.$(OBJEXT)
 shark_OBJECTS = $(am_shark_OBJECTS)
 shark_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -196,7 +197,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-shark_SOURCES = main.cpp gen.cpp info.cpp
+shark_SOURCES = main.cpp gen.cpp info.cpp file.cpp
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -301,6 +302,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/info.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
