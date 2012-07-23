@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "gen.hpp"
 #include "info.hpp"
+#include "file.hpp"
 
 //Shark package manager
 
@@ -43,11 +44,6 @@ int main(int argc, char* argv[])
 			root.append("/");
 		}
 		std::cout << "Using " << root << " as /\n";
-	}
-	if(root == "/")
-	{
-		std::cout << "Error: no fake root set (safe mode)\n";
-		return 1;
 	}
 	if(getFlag(argv, argv+argc, "-U"))
 	{
@@ -135,6 +131,25 @@ int main(int argc, char* argv[])
 		nukecmd << "rm -rf " << root << "*";
 		//std::cout << nukecmd.str() << std::endl;
 		system(nukecmd.str().c_str());
+	}
+	if(getFlag(argv, argv+argc, "--do-post"))
+	{
+		std::ifstream posts;
+		posts.open("/etc/posts");
+		if(!posts.is_open())
+		{
+			std::cout << "Error: no post scripts to perform\n";
+			return 1;
+		}
+		while(posts.good())
+		{
+			std::string line;
+			std::getline(posts, line);
+			std::stringstream cmd;
+			cmd << "bash /usr/pkg/" << line << "/posts";
+			system(cmd.str().c_str());
+		}
+		posts.close();
 	}
 	return 0;
 }
@@ -253,6 +268,27 @@ int Install(std::string package)
 	infocmd << "cp -fd " << root << "usr/pkg/" << package << "/info " << root << "usr/pkg/" << pkgname;
 	//std::cout << infocmd.str() << std::endl;
 	system(infocmd.str().c_str());
+	//check for a post script
+	std::stringstream post;
+	post << root << "usr/pkg/" << package << "/post";
+	if(FileExists(post.str().c_str()))
+	{
+		//check to see if we have a fake root
+		if(root != "/")
+		{
+			std::cout << "This package has a post install script, but you are currently using a fake root. Please chroot into your fake root and run shark --do-post\n";
+			//add the post script to the posts file
+			std::stringstream posta;
+			posta << "echo " << package << " >> " << root << "/etc/posts";
+			system(posta.str().c_str());
+		}
+		else
+		{
+			std::stringstream postcmd;
+			postcmd << "bash " << "/usr/pkg/" << package << "/post";
+			system(postcmd.str().c_str());
+		}
+	}
 	files.close();
 	return 0;
 }
