@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 	if(getFlag(argv, argv+argc, "--do-post"))
 	{
 		std::ifstream posts;
-		posts.open("/etc/posts");
+		posts.open("/etc/shark/posts");
 		if(!posts.is_open())
 		{
 			std::cout << "Error: no post scripts to perform\n";
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 			std::string line;
 			std::getline(posts, line);
 			std::stringstream cmd;
-			cmd << "bash /usr/pkg/" << line << "/posts";
+			cmd << "bash /usr/pkg/" << line << "/posts; rm /etc/shark/posts";
 			system(cmd.str().c_str());
 		}
 		posts.close();
@@ -279,7 +279,7 @@ int Install(std::string package)
 			std::cout << "This package has a post install script, but you are currently using a fake root. Please chroot into your fake root and run shark --do-post\n";
 			//add the post script to the posts file
 			std::stringstream posta;
-			posta << "echo " << package << " >> " << root << "/etc/posts";
+			posta << "echo " << package << " >> " << root << "/etc/shark/posts";
 			system(posta.str().c_str());
 		}
 		else
