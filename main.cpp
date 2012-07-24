@@ -8,6 +8,7 @@
 #include "gen.hpp"
 #include "info.hpp"
 #include "file.hpp"
+#include "repo.hpp"
 
 //Shark package manager
 
@@ -150,6 +151,10 @@ int main(int argc, char* argv[])
 			system(cmd.str().c_str());
 		}
 		posts.close();
+	}
+	if(getFlag(argv, argv+argc, "-S"))
+	{
+		return Sync(root);
 	}
 	return 0;
 }
@@ -328,10 +333,20 @@ std::string Download(std::string package, std::string ver)
 	}
 	else
 		version = ver;
+	//resolve for the correct repo
+	std::string repo = FindPkg(package, root);
+	int dot;
+	dot = repo.find(".");
+	while(dot != std::string::npos)
+	{
+		repo[dot] = '/';
+		dot = repo.find(".");
+	}
+	//std::cout << repo << "\n";
 	//get the package
 	std::cout << "Downloading package\n";
 	std::stringstream pkgcmd;
-	pkgcmd << "curl -# -f -o " << package << "-" << version << ".tar.xz http://neos300.com/astro/pkg/" << package << "-" << version << ".tar.xz";
+	pkgcmd << "curl -# -f -o " << package << "-" << version << ".tar.xz http://neos300.com/astro/pkg/" << repo << "/" << package << "-" << version << ".tar.xz";
 	if(system(pkgcmd.str().c_str()) != 0)
 	{
 		std::cout << "Unable to find package tarball for package " << package << "\n";
