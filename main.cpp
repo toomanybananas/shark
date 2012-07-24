@@ -162,7 +162,12 @@ int main(int argc, char* argv[])
 	{
 		std::vector<std::string> pkgs = GetPkgList(getField(argv, argv+argc, "-DIR"), root);
 		std::cout << "The following packages will be installed\n";
-		for(int k = 0; k < pkgs.size(); k++)
+		if(pkgs[0] == "FALSE")
+		{
+			std::cout << "Error: this repo cannot be group installed\n";
+			return 1;
+		}
+		for(int k = 1; k < pkgs.size(); k++)
 			std::cout << pkgs[k] << " ";
 		std::cout << std::endl;
 		std::cin.get();
