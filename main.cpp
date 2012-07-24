@@ -147,12 +147,15 @@ int main(int argc, char* argv[])
 		{
 			std::string line;
 			std::getline(posts, line);
+			if(line == "")
+				continue;
 			std::stringstream cmd;
 			cmd << "sh /usr/pkg/" << line << "/post";
 			std::cout << cmd.str() << std::endl;
 			system(cmd.str().c_str());
 		}
 		posts.close();
+		system("rm /etc/shark/posts");
 	}
 	if(getFlag(argv, argv+argc, "-S"))
 	{
