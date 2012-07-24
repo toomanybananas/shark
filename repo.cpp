@@ -67,12 +67,10 @@ std::vector<std::string> GetPkgList(std::string repo, std::string root)
 	std::ifstream list;
 	list.open((root + "etc/shark/repo/" + repo).c_str());
 	std::string s;
-	std::getline(list, s);
 	while(list.good())
 	{
 		std::string line;
 		std::getline(list, line);
-		std::cout << line << std::endl;
 		pkgs.push_back(line);
 	}
 	return pkgs;

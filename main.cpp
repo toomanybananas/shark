@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
 			std::cout << pkgs[k] << " ";
 		std::cout << std::endl;
 		std::cin.get();
-		for(int i = 0; i < pkgs.size(); i++)
+		for(int i = 1; i < pkgs.size(); i++)
 		{
 			if(FileExists(root + "usr/pkg/" + pkgs[i]))
 				continue;
