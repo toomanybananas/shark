@@ -24,6 +24,8 @@ int Sync(std::string root)
 	{
 		std::string line;
 		std::getline(repolist, line);
+		if(line == "")
+			continue;
 		repos.push_back(line);
 
 		//Download the list of packages in the repo
@@ -64,10 +66,14 @@ std::vector<std::string> GetPkgList(std::string repo, std::string root)
 	std::vector<std::string> pkgs;
 	std::ifstream list;
 	list.open((root + "etc/shark/repo/" + repo).c_str());
+	std::string s;
+	std::getline(list, s);
 	while(list.good())
 	{
 		std::string line;
 		std::getline(list, line);
+		std::cout << line << std::endl;
 		pkgs.push_back(line);
 	}
+	return pkgs;
 }

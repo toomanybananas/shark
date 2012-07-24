@@ -135,6 +135,7 @@ int main(int argc, char* argv[])
 	}
 	if(getFlag(argv, argv+argc, "--do-post"))
 	{
+		std::cout << "Doing post scripts\n";
 		std::ifstream posts;
 		posts.open("/etc/shark/posts");
 		if(!posts.is_open())
@@ -147,7 +148,8 @@ int main(int argc, char* argv[])
 			std::string line;
 			std::getline(posts, line);
 			std::stringstream cmd;
-			cmd << "bash /usr/pkg/" << line << "/posts; rm /etc/shark/posts";
+			cmd << "sh /usr/pkg/" << line << "/post";
+			std::cout << cmd.str() << std::endl;
 			system(cmd.str().c_str());
 		}
 		posts.close();
@@ -156,6 +158,39 @@ int main(int argc, char* argv[])
 	{
 		return Sync(root);
 	}
+	if(getFlag(argv, argv+argc, "-DIR"))
+	{
+		std::vector<std::string> pkgs = GetPkgList(getField(argv, argv+argc, "-DIR"), root);
+		std::cout << "The following packages will be installed\n";
+		for(int k = 0; k < pkgs.size(); k++)
+			std::cout << pkgs[k] << " ";
+		std::cout << std::endl;
+		std::cin.get();
+		for(int i = 0; i < pkgs.size(); i++)
+		{
+			if(FileExists(root + "usr/pkg/" + pkgs[i]))
+				continue;
+			std::string dl = Download(pkgs[i]);
+			if(dl == "")
+			{
+				return 1;
+			}
+			if(Untar(dl) != 0)
+			{
+				return 1;
+			}
+			std::string rm = "rm " + dl;
+			system(rm.c_str());
+			int dot = dl.find(".tar");
+			if(dot != std::string::npos)
+			{
+				dl = dl.substr(0, dot);
+			}
+			if(Install(dl) != 0)
+				return 1;
+		}
+	}
+
 	return 0;
 }
 
